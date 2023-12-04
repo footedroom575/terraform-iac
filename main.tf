@@ -18,8 +18,11 @@ module "security" {
   allowed_ips_for_ssh = var.allowed_ips_for_ssh
 }
 
+// databases setup
 module "database" {
   source  = "./modules/databases"
 
   lighting_db_name = "lighting-microservice"
+  heating_db_name  = "heating"
+  
 }

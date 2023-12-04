@@ -17,6 +17,17 @@ resource "aws_security_group_rule" "allow_http" {
   security_group_id = aws_security_group.allow_http.id
 }
 
+# HTTP traffic For app-servers from IPV4 & IPV6
+resource "aws_security_group_rule" "allow_app_servers" {
+  type              = "ingress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.allow_http.id
+}
+
 
 # resource group for SSH traffic
 resource "aws_security_group" "allow_ssh" {
