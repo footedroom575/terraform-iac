@@ -27,3 +27,19 @@ variable "allowed_ips_for_ssh" {
   type        = list(string)
   description = "Allowed IPs for SSHing"
 }
+
+variable "instance_names" {
+  type = list(string)
+}
+
+variable "type" {
+  type = string
+}
+
+variable "key_name" {
+  type = string
+}
+
+variable "amis" {
+  type = list(string)
+}
