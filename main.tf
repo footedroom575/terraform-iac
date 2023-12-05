@@ -37,15 +37,16 @@ module "app_servers" {
   subnet_ids     = module.vpc.public_subnet_ids
 }
 
-# // Load Balancer setup
-# module "load-balancer" {
-#   source = "./modules/load-balancer"
+// Load Balancer setup
+module "load-balancer" {
+  source = "./modules/load-balancer"
 
-#   vpc_id        = module.vpc.vpc_id
-#   tg_names      = ["heating-tg", "lights-tg", "status-tg"]
-#   tg_hc_paths   = ["/api/heating", "/api/lights", "/api/status"]
-#   instance_ids  = module.app_servers.ec2_ids
-#   sg_ids        = module.security.sg_ids
-#   subnet_ids    = module.vpc.public_subnet_ids
-#   lb_rule_paths = ["/api/heating", "/api/lights", "/api/status"]
-# }
+  vpc_id        = module.vpc.vpc_id
+  instance_ids  = module.app_servers.ec2_ids
+  sg_ids        = module.security.sg_ids
+  subnet_ids    = module.vpc.public_subnet_ids
+  tg_names      = var.tg_names
+  tg_hc_paths   = var.tg_hc_paths
+  lb_name       = var.lb_name
+  lb_rule_paths = var.lb_rule_paths
+}

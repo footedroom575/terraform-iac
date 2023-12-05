@@ -43,3 +43,19 @@ variable "key_name" {
 variable "amis" {
   type = list(string)
 }
+
+variable "tg_names" {
+  type = list(string)
+}
+
+variable "tg_hc_paths" {
+  type = list(string)
+}
+
+variable "lb_rule_paths" {
+  type = list(string)
+}
+
+variable "lb_name" {
+  type = string
+}
