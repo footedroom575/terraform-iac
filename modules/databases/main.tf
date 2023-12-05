@@ -1,6 +1,7 @@
 
-# creating lighting database
-resource "aws_dynamodb_table" "lighting" {
+# creating database
+resource "aws_dynamodb_table" "databases" {
+  count = length(var.db_names)
   attribute { # as per the microservice requirements
     name = "id"
     type = "N"
@@ -10,22 +11,6 @@ resource "aws_dynamodb_table" "lighting" {
   read_capacity  = 20
   write_capacity = 20
 
-  name           = var.lighting_db_name
-  hash_key       = "id"
-}
-
-
-# creating heating database
-resource "aws_dynamodb_table" "heating" {
-  attribute { # as per the microservice requirements
-    name = "id"
-    type = "N"
-  }
-
-  # should be enough
-  read_capacity  = 20
-  write_capacity = 20
-
-  name           = var.heating_db_name
-  hash_key       = "id"
+  name     = var.db_names[count.index]
+  hash_key = "id"
 }

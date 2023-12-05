@@ -20,9 +20,7 @@ module "security" {
 
 // databases setup
 module "database" {
-  source  = "./modules/databases"
+  source = "./modules/databases"
 
-  lighting_db_name = "lighting-microservice"
-  heating_db_name  = "heating"
-  
+  db_names = ["lighting-microservice", "heating"]
 }
