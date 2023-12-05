@@ -17,3 +17,10 @@ module "security" {
   vpc_id              = module.vpc.vpc_id
   allowed_ips_for_ssh = var.allowed_ips_for_ssh
 }
+
+// databases setup
+module "database" {
+  source = "./modules/databases"
+
+  db_names = ["lighting-microservice", "heating"]
+}
