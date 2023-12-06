@@ -18,9 +18,9 @@ variable "tg_hc_paths" {
   type = list(string)
 }
 
-variable "instance_ids" {
-  type = list(string)
-}
+# variable "instance_ids" {
+#   type = list(string)
+# }
 
 variable "subnet_ids" {
   type = list(string)

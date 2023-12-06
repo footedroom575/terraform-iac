@@ -15,14 +15,16 @@ resource "aws_lb_target_group" "target_groups" {
   }
 }
 
-# attaching target groups to their respective ec2
-resource "aws_lb_target_group_attachment" "tg_ec2_attachement" {
-  count = length(var.instance_ids)
+# commenting below because now the target groups are auto-scaled
 
-  target_group_arn = aws_lb_target_group.target_groups[count.index].arn
-  target_id        = var.instance_ids[count.index]
-  port             = 3000
-}
+# # attaching target groups to their respective ec2
+# resource "aws_lb_target_group_attachment" "tg_ec2_attachement" {
+#   count = length(var.instance_ids)
+
+#   target_group_arn = aws_lb_target_group.target_groups[count.index].arn
+#   target_id        = var.instance_ids[count.index]
+#   port             = 3000
+# }
 
 # setting up alb
 resource "aws_lb" "app_lb" {

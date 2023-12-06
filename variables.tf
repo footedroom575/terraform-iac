@@ -59,3 +59,19 @@ variable "lb_rule_paths" {
 variable "lb_name" {
   type = string
 }
+
+variable "lt_names" {
+  type = list(string)
+}
+
+variable "min_size" {
+  type = number
+}
+
+variable "max_size" {
+  type = number
+}
+
+variable "desired_capacity" {
+  type = number
+}
