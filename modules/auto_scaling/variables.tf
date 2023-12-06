@@ -1,39 +1,42 @@
-variable "lt_names" {
-  type = list(string)
-}
+
 
 variable "ami_ids" {
-  type = list(string)
+  type        = list(string)
+  description = "Amazon Machine Image (AMI) ids to for creating launch template"
 }
 
 variable "target_group_arns" {
-  type = list(string)
+  type        = list(string)
+  description = "Target groups ARNs linked with Application Load Balancer for auto-scaling integeration"
 }
 
 variable "ssh_key_name" {
-  type = string
+  type        = string
+  description = "SSH key name (as stored in AWS)"
 }
 
 variable "az" {
-  type = string
+  type        = string
+  description = "Availability Zone to deploy the Auto-Scaling group in"
 }
 
 variable "subnet_id" {
-  type = string
+  type        = string
+  description = "ID of aws_subnet for configuring the Network Interface of each launch template"
 }
 
 variable "sg_ids" {
-  type = list(string)
+  type        = list(string)
+  description = "Security Group IDs to be linked with each launch template"
 }
 
-variable "desired_capacity" {
-    type = string
-}
-
-variable "max_size" {
-    type = string
-}
-
-variable "min_size" {
-    type = string
+variable "lt_data" {
+  description = "Details for auto scaling by each service"
+  type = list(object({
+    name             = string
+    desired_capacity = number
+    max_size         = number
+    min_size         = number
+  }))
+  default = []
 }
