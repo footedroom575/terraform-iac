@@ -1,55 +1,146 @@
-# Terraform project
+# Terraform Infrastructure as Code (IaC)
 
-![A hero starting their journey looking at a tower](./media/images/journey.png "A hero starting their journey looking at a tower")
-
-It is time to take those Terraform skills you have been developing and create your own project.
-
-Time to start your journey and create a brand new Terraform project from scratch.
-
-Side note: The image is what AI generated when the words "success, journey and terraform logo" were put into the tool 🤷
-
-You can find the trello board to copy for your project below
-
-[Cloud Ops Terraform Project Template](https://trello.com/b/ANaPDxTY/ce-terraform-project-template)
+This project contains Terraform configuration files for provisioning and managing a scalable and secure infrastructure on AWS. The infrastructure setup includes the creation of a Virtual Private Cloud (VPC), security configurations, databases, load balancers, and auto-scaling for EC2 microservices. 
 
 ## Requirements
+- [AWS Account](https://portal.aws.amazon.com/billing/signup)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+- [App/Microservice AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
 
-The target for this project is to create a hosted network of microservices that mocks a smart home network with; a central status service, a lighting service, and a heating service.
 
-But that isn't everything....
+## Installation
 
-Your solution should;
+Clone the repo:
+```
+git clone https://github.com/footedroom575/ce-terraform-project.git
+```
 
-- Be completed using terraform
-- Be a production ready network setup with both public and private subnets
-- Make use of terraform variables and looping where possible
-- Make your code as DRY and reusable as possible by creating modules where you can
-- Have DynamoDB tables to account for the services that need them
-- Be created with 'design for failure' in mind - we do not want a loss of service if one of the EC2 instances fails
-- Be considerate and intentional of how your files and directory structures are named
+Inside repo, run below set of commands in order:
 
-[Here](https://trello.com/b/ANaPDxTY/ce-terraform-project-template) you will find a trello board with the tickets needed to finish this project.
+```
+terraform init
+```
 
-## Tearing things down
+After changing `terraform.tfvars` and [authenticating your aws credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html), run:
+```
+terraform apply
+```
 
-You should run `terraform destroy` to remove everything at the end of each day, if you've created your code well it should be able to recreate each time without issue.
 
-## Submission process
+## Modules
 
-1. Fork this GitHub repository
+### VPC
+The VPC module `(./modules/vpc)` creates a Virtual Private Cloud with specified parameters such as VPC name, CIDR block, public and private subnets, and availability zones. This VPC contains all resources that are going to be created inside this project.
 
-2. Make a branch for each tickets code `git checkout -b NEW_BRANCH_NAME`
+```
+module "vpc" {
+  source          = "./modules/vpc"
 
-3. Create a Pull Request and merge the branch back into main on GitHub when the ticket is done
+  # name of vpc
+  vpc_name        = var.vpc_name
 
-4. Submit the Pull Request link to `nchelp pr`
+  # CIDR range of VPC. The subnet CIDRs are dependant on this value.
+  vpc_cidr        = var.vpc_cidr
 
-5. Checkout back to the main branch `git checkout main` and pull your code to the main branch `git pull origin main`
+  # CIDR ranges of public subnets created inside VPC
+  public_subnets  = var.public_subnets
 
-6. Create a new branch for the next ticket and repeat until finished.
+  # CIDR ranges of private subnets created inside VPC
+  private_subnets = var.private_subnets
 
-## Further reading
+  # List of Availability Zones for public & private subnets
+  azs             = var.azs
+}
+```
 
-[Terraform directory structure tips](https://xebia.com/blog/four-tips-to-better-structure-terraform-projects/)
+### Security
+The Security module `(./modules/security)` configures security settings, including the VPC ID and allowed IP addresses for SSH access. It allows for ingress HTTP, HTTPS, SSH and application server port and egress all protocols and ports.
 
-[Terraform best practices structure](https://www.terraform-best-practices.com/examples/terraform)
+```
+module "security" {
+  source              = "./modules/security"
+
+  # ID of the VPC to create security groups in.
+  vpc_id              = module.vpc.vpc_id
+
+  # IPs to whitelist for SSH access. Using 32 bit CIDR is recommended.
+  allowed_ips_for_ssh = var.allowed_ips_for_ssh
+}
+```
+
+### Databases
+The Database module `(./modules/databases)` sets up [DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html) tables with specified names. If you don't need one, pass an empty object or comment this module block.
+
+```
+module "database" {
+  source  = "./modules/databases"
+
+  # List of names of databases to create for microservices
+  db_names = var.db_names
+}
+```
+
+### Load Balancer
+The Load Balancer module `(./modules/load-balancer)` configures a load balancer with associated parameters like VPC ID, security group IDs, subnet IDs, target group names, health check paths, load balancer name, and rule paths. Its an [Application Load Balancer (ALB)](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) that uses [path-based routing](https://aws.amazon.com/blogs/containers/using-aws-application-load-balancer-path-based-routing-to-combine-amazon-ecs-launch-types/).
+
+```
+module "load-balancer" {
+  source        = "./modules/load-balancer"
+
+  # ID of the VPC to create load balancer in.
+  vpc_id        = module.vpc.vpc_id
+
+  # Name of the Application Load Balancer (ALB)
+  lb_name       = var.lb_name
+
+  # IDs of security groups to link with Application Load Balancer (ALB)
+  sg_ids        = module.security.sg_ids
+
+  # IDs of subnets to create the ALB in.
+  subnet_ids    = module.vpc.public_subnet_ids
+
+  # Names of target groups to be linked with Application Load Balancer (ALB)
+  tg_names      = var.tg_names
+
+  # List of paths used for ALB target group health check i.e. url path of health check endpoint that can be used to identify health/state of application
+  tg_hc_paths   = var.tg_hc_paths
+
+  # List of paths used for ALB listeners to forward the requests
+  lb_rule_paths = var.lb_rule_paths
+}
+```
+
+### Auto Scaling
+The Auto Scaling module `(./modules/auto_scaling)` automates the scaling of instances based on specified parameters such as availability zone, SSH key name, launch template names, minimum and maximum instance sizes, desired capacity, subnet ID, security group IDs, AMI IDs, and target group ARNs. Read more about auto scaling [here](https://aws.amazon.com/autoscaling/). 
+
+```
+module "auto_scaling" {
+  source = "./modules/auto_scaling"
+
+  # Availability Zone to deploy the Auto-Scaling group in
+  az                = var.azs[0]
+
+  # SSH key name (as stored in AWS)
+  ssh_key_name      = var.key_name
+
+  # Details for auto scaling by each service such as name, desired_capacity, max_size & min_size
+  lt_data           = var.lt_data
+
+  # ID of aws_subnet for configuring the Network Interface of each launch template
+  subnet_id         = module.vpc.public_subnet_ids[0]
+
+  # Security Group IDs to be linked with each launch template
+  sg_ids            = module.security.sg_ids
+
+  # Amazon Machine Image (AMI) ids to for creating launch template
+  ami_ids           = var.amis
+
+  # Target groups ARNs linked with Application Load Balancer for auto-scaling integeration
+  target_group_arns = module.load-balancer.target_group_arns
+}
+```
+
+### Note
+
+Currently, the microservices setup using the `app_servers` module is commented out as target groups are now auto-scaled. Also, current setup only utlises first availability zone, you can change that as per your requirements in `modules/[module_name]/main.tf`.

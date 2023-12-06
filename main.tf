@@ -22,7 +22,7 @@ module "security" {
 module "database" {
   source = "./modules/databases"
 
-  db_names = ["lighting-microservice", "heating"]
+  db_names = var.db_names
 }
 
 
@@ -58,10 +58,7 @@ module "auto_scaling" {
 
   az                = var.azs[0]
   ssh_key_name      = var.key_name
-  lt_names          = var.lt_names
-  min_size          = var.min_size
-  max_size          = var.max_size
-  desired_capacity  = var.desired_capacity
+  lt_data           = var.lt_data
   subnet_id         = module.vpc.public_subnet_ids[0]
   sg_ids            = module.security.sg_ids
   ami_ids           = var.amis

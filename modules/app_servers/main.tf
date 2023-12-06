@@ -16,7 +16,7 @@ module "ec2_instance" {
   subnet_id              = var.subnet_ids[0]
 
   # custom private ip to make it more dynamic and avoid using public dns
-  private_ip             = "10.0.1.1${count.index+1}"
+  private_ip = "10.0.1.1${count.index + 1}"
 
   associate_public_ip_address = true
 }
