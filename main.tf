@@ -43,7 +43,7 @@ module "database" {
 module "load-balancer" {
   source = "./modules/load-balancer"
 
-  vpc_id        = module.vpc.vpc_id
+  vpc_id = module.vpc.vpc_id
   # instance_ids  = module.app_servers.ec2_ids
   sg_ids        = module.security.sg_ids
   subnet_ids    = module.vpc.public_subnet_ids

@@ -4,6 +4,6 @@ variable "vpc_id" {
 }
 
 variable "allowed_ips_for_ssh" {
-  type = list(string)
+  type        = list(string)
   description = "IPs to whitelist for SSH access. Using 32 bit CIDR is recommended."
 }
