@@ -2,6 +2,8 @@
 
 This project contains Terraform configuration files for provisioning and managing a scalable and secure infrastructure on AWS. The infrastructure setup includes the creation of a Virtual Private Cloud (VPC), security configurations, databases, load balancers, and auto-scaling for EC2 microservices. 
 
+![Graphical Representation of Infrastructure](infrastructure.svg)
+
 ## Requirements
 - [AWS Account](https://portal.aws.amazon.com/billing/signup)
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
